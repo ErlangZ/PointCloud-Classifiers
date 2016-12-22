@@ -11,12 +11,15 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include "types.h"
+#include "label_reader.h"
+
 void viewOneOff(pcl::visualization::PCLVisualizer& viewer) {
     viewer.setBackgroundColor(0, 0, 0); // set background black.
 }
 
 int main() {
-    //Read from File
+    //Read Point Cloud from File
     pcl::PCDReader file_reader;
     std::string file_name = "/home/erlangz/3D_point_cloud/0711/original_cloud/QB9178_12_1461753402_1461753702_3641.pcd";
     pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud(new pcl::PointCloud<pcl::PointXYZ>); //Point Cloud MonochromeCloud(pcl::PointCloud<pcl::PointXYZ>)
@@ -32,7 +35,15 @@ int main() {
     }
     std::cout << "Open file:" << file_name << " file_version:" << file_version << std::endl;
 
-    //Show on the Screen
+    //Read Cubes from File.
+    file_name = "/home/erlangz/3D_point_cloud/0711/groundtruth/result.txt";
+    adu::perception::LabelsReader reader;
+    if (!reader.init(file_name)) {
+        std::cerr << "Open Label File:" << file_name << " failed." << std::endl;
+        return -1;
+    }
+
+    //Show Point Cloud on the Screen
     pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
     cloud_viewer.showCloud(point_cloud);
     cloud_viewer.runOnVisualizationThreadOnce(viewOneOff);

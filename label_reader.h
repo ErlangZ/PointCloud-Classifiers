@@ -15,12 +15,12 @@ class LabelsReader {
 public:
     bool init(const std::string& file_name);
 
-    const std::vector<Label>& data() const {
-        return _labels;
+    const std::vector<Label::Ptr>& get(const std::string& pcd_file_name) const {
+        return _labels[pcd_file_name];
     }
 private:
-    std::string _file_name;
-    std::vector<Label> _labels;
+    std::string _labels_file_name;
+    mutable std::unordered_map<std::string, std::vector<Label::Ptr>> _labels;
 };
 
 } // namespace perception

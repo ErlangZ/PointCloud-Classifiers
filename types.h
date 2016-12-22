@@ -38,17 +38,19 @@ public:
     Box(const pt::ptree& root); 
 
     std::string debug_string() const;
+    typedef std::shared_ptr<Box> Ptr;
 };
 
 class Label {
     std::string file_name;
-    mutable std::unordered_map<std::string, std::shared_ptr<Box> > boxes;
+    std::vector<Box::Ptr> boxes;
 public:
     Label(const std::string& file, const pt::ptree& root);
-    const Box& get(const std::string file) const {
-        return *boxes[file];
+    const std::vector<Box::Ptr>& get(const std::string file) const {
+        return boxes;
     }
     std::string debug_string() const;
+    typedef std::shared_ptr<Label> Ptr;
 };
 
 } //namespace perception

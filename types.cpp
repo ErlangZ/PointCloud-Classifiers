@@ -45,7 +45,7 @@ std::string Box::debug_string() const {
 Label::Label(const std::string& file, const pt::ptree& root) {
     file_name = file.substr(7); //"./file/xxx" -> "xxx"
     for (const auto& result : root.get_child("result")) {
-        boxes.insert(std::make_pair(file_name, std::shared_ptr<Box>(new Box(result.second)))); 
+        boxes.emplace_back(new Box(result.second)); 
     }
 }
 
@@ -54,9 +54,10 @@ std::string Label::debug_string() const {
     ss << "file_name:" << file_name 
        << "Boxes:(" << boxes.size() << ")";
     for (const auto& box : boxes) {
-        ss << "[" << box.second->debug_string() << "]";
+        ss << "[" << box->debug_string() << "]";
     }
     return ss.str();
 }
+
 } // namespace perception
 } // namespace adu

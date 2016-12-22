@@ -13,12 +13,12 @@ namespace adu {
 namespace perception {
 
 bool LabelsReader::init(const std::string& file_name) {
-    _file_name = file_name;
+    _labels_file_name = file_name;
     //Read Data from line 
     std::ifstream ifs;
-    ifs.open(_file_name.c_str(), std::fstream::in);
+    ifs.open(_labels_file_name.c_str(), std::fstream::in);
     if (!ifs) {
-        std::cerr << "Open File:" << _file_name << " failed. e:" << strerror(errno) << std::endl;
+        std::cerr << "Open File:" << _labels_file_name << " failed. e:" << strerror(errno) << std::endl;
         return false;
     }
     //Parse Data from Columns
@@ -35,7 +35,7 @@ bool LabelsReader::init(const std::string& file_name) {
 
         pt::ptree root;
         pt::read_json(json_stream, root);
-        _labels.emplace_back(pcd_file_name, root);
+        _labels[pcd_file_name].emplace_back(new Label(pcd_file_name, root));
         std::cout << "LabelsReader pcd_file_name:" << pcd_file_name << std::endl;
     }
     return true;

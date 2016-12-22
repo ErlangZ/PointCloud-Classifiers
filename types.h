@@ -8,9 +8,11 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <memory>
 
 #include <Eigen/Geometry>
 #include <boost/property_tree/ptree.hpp>
@@ -26,7 +28,7 @@ enum Type {
     smallMot = 0
 };
 
-struct Box {
+class Box {
     Eigen::AngleAxisd rotation_x;
     Eigen::AngleAxisd rotation_y;
     Eigen::AngleAxisd rotation_z;
@@ -38,11 +40,14 @@ public:
     std::string debug_string() const;
 };
 
-struct Label {
+class Label {
     std::string file_name;
-    std::vector<Box> boxes;
+    mutable std::unordered_map<std::string, std::shared_ptr<Box> > boxes;
 public:
     Label(const std::string& file, const pt::ptree& root);
+    const Box& get(const std::string file) const {
+        return *boxes[file];
+    }
     std::string debug_string() const;
 };
 

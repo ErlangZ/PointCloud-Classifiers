@@ -27,7 +27,7 @@ bool LabelsReader::init(const std::string& file_name) {
 
         std::vector<std::string> columns;
         boost::split(columns, line, boost::is_any_of(" \t"));
-        std::string& pcd_file_name = columns[2];
+        const std::string& pcd_file_name = columns[2].substr(8); //"./files/xxx" -> "xxx"
         std::string& json_data = columns[3];
 
         std::stringstream json_stream;
@@ -35,8 +35,11 @@ bool LabelsReader::init(const std::string& file_name) {
 
         pt::ptree root;
         pt::read_json(json_stream, root);
-        _labels[pcd_file_name].emplace_back(new Label(pcd_file_name, root));
-        std::cout << "LabelsReader pcd_file_name:" << pcd_file_name << std::endl;
+        _labels[pcd_file_name] = Label::Ptr(new Label(pcd_file_name, root));
+//        if (pcd_file_name == "QB9178_12_1461753402_1461753702_3641.pcd") {
+//            std::cout << _labels[pcd_file_name]->debug_string();
+//        }
+//        std::cout << "LabelsReader pcd_file_name:" << pcd_file_name << std::endl;
     }
     return true;
 }

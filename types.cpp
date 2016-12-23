@@ -9,7 +9,8 @@
 namespace adu {
 namespace perception {
 
-Box::Box(const pt::ptree& root) {
+Box::Box(int id_, const pt::ptree& root) {
+    id = id_;
     //Rotation 
     const auto& r = root.get_child("rotation");
     //phi - Z axis; theta - X axis; psi - Y axis
@@ -38,14 +39,18 @@ std::string Box::debug_string() const {
        << " box:(" << bounding_box.max().transpose() << ","<< bounding_box.min().transpose() << ")"
        << " rotation:(x:" << rotation_x.angle() << "),"
        << " (y:" << rotation_y.angle() << "),"
-       << " (z:" << rotation_z.angle() << ")";
+       << " (z:" << rotation_z.angle() << ")"
+       << "T:" << translation().transpose() << " R:" << rotation().matrix()
+       << " width:" << width() << " depth:" << depth() << " height:" << height();
+
     return ss.str();
 }
 
 Label::Label(const std::string& file, const pt::ptree& root) {
-    file_name = file.substr(7); //"./file/xxx" -> "xxx"
+    file_name = file; 
+    int i = 0;
     for (const auto& result : root.get_child("result")) {
-        boxes.emplace_back(new Box(result.second)); 
+        boxes.emplace_back(new Box(i++, result.second)); 
     }
 }
 

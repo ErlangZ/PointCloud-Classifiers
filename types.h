@@ -34,22 +34,28 @@ class Box {
     Eigen::AngleAxisd rotation_z;
     Eigen::AlignedBox3d bounding_box;
     std::string type;
+    int id = 0;
 public:
-    Box(const pt::ptree& root); 
-    Eigen::Vector3d translation() const {
+    Box(int id, const pt::ptree& root); 
+    const Eigen::Vector3d translation() const {
         return bounding_box.min();
     }
-    Eigen::Quaterniond rotation() const {
+    const Eigen::Quaterniond rotation() const {
         return rotation_x * rotation_y * rotation_z;
     }
-    double width() const {
+    double depth() const {
         return (bounding_box.max() - bounding_box.min())(0);
     }
-    double depth() const {
+    double width() const {
         return (bounding_box.max() - bounding_box.min())(1);
     }
     double height() const {
         return (bounding_box.max() - bounding_box.min())(2);
+    }
+    const std::string id_str() const {
+        std::stringstream ss;
+        ss << type << "-" << id;
+        return ss.str();
     }
     std::string debug_string() const;
     typedef std::shared_ptr<Box> Ptr;

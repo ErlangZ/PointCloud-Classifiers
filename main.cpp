@@ -14,10 +14,6 @@
 #include "types.h"
 #include "label_reader.h"
 
-void viewOneOff(pcl::visualization::PCLVisualizer& viewer) {
-    viewer.setBackgroundColor(0, 0, 0); // set background black.
-}
-
 int main() {
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
 
@@ -45,19 +41,22 @@ int main() {
         return -1;
     }
     
-    const auto& labels = labels_reader.get(pcd_file_name);
+    const auto& label = labels_reader.get(pcd_file_name);
     //Show Point Cloud on the Screen
     pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
 
-    cloud_viewer.runOnVisualizationThreadOnce([&labels](pcl::visualization::PCLVisualizer& viewer) {
-        for (const auto& label : labels) {
-            for (const auto& box : label->boxes) {
-                viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth());
-            }
+    cloud_viewer.showCloud(point_cloud);
+    cloud_viewer.runOnVisualizationThreadOnce([&label,&pcd_file_name](pcl::visualization::PCLVisualizer& viewer) {
+        viewer.setBackgroundColor(0, 0, 0); // set background black.
+        if (!label) {
+            std::cerr << "Labels in pcd_file:" << pcd_file_name << " open failed."<< std::endl;
+            return;
+        }
+        for (const auto& box : label->boxes) {
+            viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth(), box->id_str());
+            std::cout << "Add Box:" << box->debug_string() << std::endl;
         }
     });
-    cloud_viewer.showCloud(point_cloud);
-    cloud_viewer.runOnVisualizationThreadOnce(viewOneOff);
     
     while(!cloud_viewer.wasStopped()) {
     }

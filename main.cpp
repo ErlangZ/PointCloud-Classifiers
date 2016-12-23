@@ -39,18 +39,27 @@ int main() {
 
     //Read Cubes from File.
     std::string label_file_name = "/home/erlangz/3D_point_cloud/0711/groundtruth/result.txt";
-    adu::perception::LabelsReader labels;
-    if (!labels.init(label_file_name)) {
+    adu::perception::LabelsReader labels_reader;
+    if (!labels_reader.init(label_file_name)) {
         std::cerr << "Open Label File:" << label_file_name << " failed." << std::endl;
         return -1;
     }
     
-    const auto& boxes = labels.get(pcd_file_name);
+    const auto& labels = labels_reader.get(pcd_file_name);
     //Show Point Cloud on the Screen
     pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
+
+    cloud_viewer.runOnVisualizationThreadOnce([&labels](pcl::visualization::PCLVisualizer& viewer) {
+        for (const auto& label : labels) {
+            for (const auto& box : label->boxes) {
+                viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth());
+            }
+        }
+    });
     cloud_viewer.showCloud(point_cloud);
     cloud_viewer.runOnVisualizationThreadOnce(viewOneOff);
-
-    std::cin >> ret;
+    
+    while(!cloud_viewer.wasStopped()) {
+    }
     return 0;
 }

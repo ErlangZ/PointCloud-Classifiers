@@ -36,15 +36,29 @@ class Box {
     std::string type;
 public:
     Box(const pt::ptree& root); 
-
+    Eigen::Vector3d translation() const {
+        return bounding_box.min();
+    }
+    Eigen::Quaterniond rotation() const {
+        return rotation_x * rotation_y * rotation_z;
+    }
+    double width() const {
+        return (bounding_box.max() - bounding_box.min())(0);
+    }
+    double depth() const {
+        return (bounding_box.max() - bounding_box.min())(1);
+    }
+    double height() const {
+        return (bounding_box.max() - bounding_box.min())(2);
+    }
     std::string debug_string() const;
     typedef std::shared_ptr<Box> Ptr;
 };
 
 class Label {
     std::string file_name;
-    std::vector<Box::Ptr> boxes;
 public:
+    std::vector<Box::Ptr> boxes;
     Label(const std::string& file, const pt::ptree& root);
     const std::vector<Box::Ptr>& get(const std::string file) const {
         return boxes;

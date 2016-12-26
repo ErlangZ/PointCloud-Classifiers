@@ -15,6 +15,9 @@
 #include <memory>
 
 #include <Eigen/Geometry>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/PointIndices.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/algorithm/string.hpp>
@@ -59,6 +62,15 @@ public:
     }
     std::string debug_string() const;
     typedef std::shared_ptr<Box> Ptr;
+    friend class BoxFilter;
+};
+
+class BoxFilter {
+    //filter the point cloud
+    static pcl::PointIndices::Ptr filter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud,  const Box& box);
+
+    static pcl::PointCloud<pcl::PointXYZ>::Ptr filter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud, 
+                                                      const pcl::PointIndices::Ptr& point_indice);
 };
 
 class Label {

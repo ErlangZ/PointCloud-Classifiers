@@ -46,6 +46,18 @@ std::string Box::debug_string() const {
     return ss.str();
 }
 
+pcl::PointIndices::Ptr BoxFilter::filter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud, const Box& box) {
+    pcl::PointIndices::Ptr indice(new pcl::PointIndices);
+    for (size_t i = 0; i < point_cloud->size(); i++) {
+        auto& point = point_cloud->at(i);
+        if (box.bounding_box.exteriorDistance(Eigen::Vector3d(point.x, point.y, point.z)) < 0) {
+            //the point in the bounding_box
+            indice->indices.push_back(i);
+        }
+    }
+    return indice;
+}
+
 Label::Label(const std::string& file, const pt::ptree& root) {
     file_name = file; 
     int i = 0;

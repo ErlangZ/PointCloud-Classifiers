@@ -15,6 +15,7 @@
 #include "label_reader.h"
 
 int main() {
+    using adu::perception::Box;
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
 
     //Read Point Cloud from File
@@ -41,31 +42,35 @@ int main() {
         return -1;
     }
     
-    const auto& label = labels_reader.get(pcd_file_name);
+    BOOST_AUTO(label, labels_reader.get(pcd_file_name));
     //Show Point Cloud on the Screen
     pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
 
     //Filter Points in Box
     pcl::PointIndices::Ptr all_in_boxes = pcl::PointIndices::Ptr(new pcl::PointIndices);
-    for (const auto& box: label->boxes) {
-        const auto point = adu::perception::BoxFilter::filter(point_cloud, *box);
+    for (size_t i = 0; i < label->boxes.size(); i++) {
+        const Box::Ptr& box = label->boxes[i];
+        BOOST_AUTO(point, adu::perception::BoxFilter::filter(point_cloud, *box));
         all_in_boxes->indices.insert(all_in_boxes->indices.end(), point->indices.begin(), point->indices.end());
     }
     point_cloud = adu::perception::BoxFilter::filter(point_cloud, all_in_boxes);
    
 
     cloud_viewer.showCloud(point_cloud);
+    /*
     cloud_viewer.runOnVisualizationThreadOnce([&label,&pcd_file_name](pcl::visualization::PCLVisualizer& viewer) {
         viewer.setBackgroundColor(0, 0, 0); // set background black.
         if (!label) {
             std::cerr << "Labels in pcd_file:" << pcd_file_name << " open failed."<< std::endl;
             return;
         }
-        for (const auto& box : label->boxes) {
+        for (size_t i = 0; i < label->boxes.size(); i++) {
+            const Box::Ptr& box = label->boxes[i];
             viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth(), box->id_str());
             std::cout << "Add Box:" << box->debug_string() << std::endl;
         }
     });
+    */
     
     while(!cloud_viewer.wasStopped()) {
     }

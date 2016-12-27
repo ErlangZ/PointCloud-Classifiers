@@ -8,16 +8,15 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <memory>
 
 #include <Eigen/Geometry>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/PointIndices.h>
+#include <boost/unordered_map.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/algorithm/string.hpp>
@@ -37,7 +36,7 @@ class Box {
     Eigen::AngleAxisd rotation_z;
     Eigen::AlignedBox3d bounding_box;
     std::string type;
-    int id = 0;
+    int id;
 public:
     Box(int id, const pt::ptree& root); 
     const Eigen::Vector3d translation() const {
@@ -61,7 +60,7 @@ public:
         return ss.str();
     }
     std::string debug_string() const;
-    typedef std::shared_ptr<Box> Ptr;
+    typedef boost::shared_ptr<Box> Ptr;
     friend class BoxFilter;
 };
 
@@ -83,7 +82,7 @@ public:
         return boxes;
     }
     std::string debug_string() const;
-    typedef std::shared_ptr<Label> Ptr;
+    typedef boost::shared_ptr<Label> Ptr;
 };
 
 } //namespace perception

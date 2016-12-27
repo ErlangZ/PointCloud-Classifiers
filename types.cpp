@@ -6,6 +6,8 @@
 
 #include "types.h" 
 
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 #include <pcl/filters/extract_indices.h>
 
 namespace adu {
@@ -14,17 +16,17 @@ namespace perception {
 Box::Box(int id_, const pt::ptree& root) {
     id = id_;
     //Rotation 
-    const auto& r = root.get_child("rotation");
+    BOOST_AUTO(r, root.get_child("rotation"));
     //phi - Z axis; theta - X axis; psi - Y axis
     rotation_z = Eigen::AngleAxisd(r.get<double>("phi"), Eigen::Vector3d::UnitZ());
     rotation_x = Eigen::AngleAxisd(r.get<double>("theta"), Eigen::Vector3d::UnitX());
     rotation_y = Eigen::AngleAxisd(r.get<double>("psi"), Eigen::Vector3d::UnitY());
 
     //AlignedBox 
-    const auto& t = root.get_child("position");
+    BOOST_AUTO(t, root.get_child("position"));
     Eigen::Translation3d top = Eigen::Translation3d(t.get<double>("x"), t.get<double>("y"), t.get<double>("z"));
     std::vector<double> size;
-    for (const auto& item : root.get_child("size")) {
+    BOOST_FOREACH(const pt::ptree::value_type& item, root.get_child("size")) {
         size.push_back(item.second.get_value<double>());
     }
     Eigen::Translation3d bottom = Eigen::Translation3d(top.x() + size[1], top.y() + size[2], top.z() + size[0]);
@@ -51,7 +53,7 @@ std::string Box::debug_string() const {
 pcl::PointIndices::Ptr BoxFilter::filter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud, const Box& box) {
     pcl::PointIndices::Ptr indice(new pcl::PointIndices);
     for (size_t i = 0; i < point_cloud->size(); i++) {
-        auto& point = point_cloud->at(i);
+        BOOST_AUTO(point, point_cloud->at(i));
         if (box.bounding_box.exteriorDistance(Eigen::Vector3d(point.x, point.y, point.z)) < 0) {
             //the point in the bounding_box
             indice->indices.push_back(i);
@@ -75,8 +77,8 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr BoxFilter::filter(
 Label::Label(const std::string& file, const pt::ptree& root) {
     file_name = file; 
     int i = 0;
-    for (const auto& result : root.get_child("result")) {
-        boxes.emplace_back(new Box(i++, result.second)); 
+    BOOST_FOREACH(const pt::ptree::value_type& result, root.get_child("result")) {
+        boxes.push_back(Box::Ptr(new Box(i++, result.second))); 
     }
 }
 
@@ -84,8 +86,8 @@ std::string Label::debug_string() const {
     std::stringstream ss;
     ss << "file_name:" << file_name 
        << "Boxes:(" << boxes.size() << ")";
-    for (const auto& box : boxes) {
-        ss << "[" << box->debug_string() << "]";
+    for (size_t i = 0; i < boxes.size(); i++) {
+        ss << "[" << boxes[i]->debug_string() << "]";
     }
     return ss.str();
 }

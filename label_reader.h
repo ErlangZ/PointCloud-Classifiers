@@ -20,7 +20,7 @@ public:
     }
 private:
     std::string _labels_file_name;
-    mutable std::unordered_map<std::string, Label::Ptr> _labels;
+    mutable boost::unordered_map<std::string, Label::Ptr> _labels;
 };
 
 } // namespace perception

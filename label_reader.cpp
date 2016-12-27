@@ -7,7 +7,6 @@
 #include "label_reader.h"
 
 #include <exception>
-#include <system_error>
 
 namespace adu {
 namespace perception {

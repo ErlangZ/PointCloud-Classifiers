@@ -32,40 +32,63 @@ Box::Box(int id_, const pt::ptree& root) {
                                        Eigen::Vector3d(center.get<double>("x") + size[0]/2, center.get<double>("y") + size[1]/2, center.get<double>("z") + size[2]/2));
 
     //Type
-    type = root.get<std::string>("type");
+    const std::string& type_str = root.get<std::string>("type");
+    if (type_str == "smallMot") {
+        type = smallMot;
+    } else if (type_str == "pedestrian") {
+        type = pedestrian;
+    } else if (type_str == "bigMot") {
+        type = bigMot;
+    } else if (type_str == "midMot") {
+        type = midMot;
+    } else if (type_str == "nonMot") {
+        type = nonMot;
+    } else if (type_str == "unknow") {
+        type = unknown;
+    } else if (type_str == "cluster") {
+        type = cluster;
+    } else {
+        std::cout << type_str << std::endl;
+    }
+}
+
+void Box::show(pcl::visualization::PCLVisualizer& viewer) {
+    Eigen::Vector3f color = get_color();
+    viewer.addCube(bounding_box.min().x(), bounding_box.max().x(), 
+                   bounding_box.min().y(), bounding_box.max().y(), 
+                   bounding_box.min().z(), bounding_box.max().z(), 
+                   color(0), color(1), color(2),
+                   id_str());
+}
+
+const std::string Box::id_str() const {
+    std::stringstream ss;
+    ss << type << "-" << id;
+    return ss.str();
+}
+
+Eigen::Vector3f Box::get_color() const {
+    switch (type) {
+        case smallMot: return Eigen::Vector3f(0.0, 1.0, 0.0);
+        case midMot: return Eigen::Vector3f(0.0, 0.8, 0.0);
+        case bigMot: return Eigen::Vector3f(0.0, 0.9, 0.0);
+        case nonMot: return Eigen::Vector3f(0.0, 0.7, 0.0);
+        case pedestrian: return Eigen::Vector3f(1.0, 0.0, 0.0);
+        case unknown: return Eigen::Vector3f(0.0, 0.0, 1.0);
+    }
 }
 
 std::string Box::debug_string() const {
     std::stringstream ss;
     ss << "type:" << type 
-       << " box:(" << bounding_box.max().transpose() << ","<< bounding_box.min().transpose() << ")"
-       //<< " rotation:(x:" << rotation_x.angle() << "),"
-       //<< " (y:" << rotation_y.angle() << "),"
-       //<< " (z:" << rotation_z.angle() << ")"
-       << "T:" << translation().transpose() << " R:" << rotation().matrix()
-       << " width:" << width() << " depth:" << depth() << " height:" << height();
-
+       << " box:(" << bounding_box.max().transpose() << ","<< bounding_box.min().transpose() << ")";
     return ss.str();
 }
 
 pcl::PointIndices::Ptr BoxFilter::filter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud, const Box& box) {
     pcl::PointIndices::Ptr indice(new pcl::PointIndices);
     for (size_t i = 0; i < point_cloud->size(); i++) {
-        //std::cout << "exteriorDistance:" << box.bounding_box.exteriorDistance(Eigen::Vector3d(point.x, point.y, point.z)) << std::endl;
         if (box.bounding_box.exteriorDistance(Eigen::Vector3d(point_cloud->at(i).x, point_cloud->at(i).y, point_cloud->at(i).z)) == 0) {
-            /*
-            if (!(point_cloud->at(i).x >= box.bounding_box.min()(0, 0) && \
-                point_cloud->at(i).y >= box.bounding_box.min()(1, 0) && \
-                point_cloud->at(i).z >= box.bounding_box.min()(2, 0) && \
-                point_cloud->at(i).x <= box.bounding_box.max()(0, 0) && \
-                point_cloud->at(i).y <= box.bounding_box.max()(1, 0) && \
-                point_cloud->at(i).z <= box.bounding_box.max()(2, 0))) {
-                std::cout << "Outside Point:" << point_cloud->at(i) << " BoundingBox:(min:" << box.bounding_box.min() << ", max:" << box.bounding_box.max() << std::endl;
-                //the point in the bounding_box
-            } else {
-                indice->indices.push_back(i);
-            }
-            */
             indice->indices.push_back(i);
         }
     }

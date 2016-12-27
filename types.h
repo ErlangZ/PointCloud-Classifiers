@@ -16,6 +16,7 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/PointIndices.h>
+#include <pcl/visualization/cloud_viewer.h>
 #include <boost/unordered_map.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -27,39 +28,32 @@ namespace adu {
 namespace perception {
 
 enum Type {
-    smallMot = 0
+    unknown = 0,
+    nonMot = 1, 
+    bigMot = 2,
+    midMot = 3,
+    smallMot = 4,
+    pedestrian = 5,
+    cluster = 6
 };
 
 class Box {
+public:
+    Box(int id, const pt::ptree& root); 
+    void show(pcl::visualization::PCLVisualizer& viewer);
+    const std::string id_str() const;
+    std::string debug_string() const;
+private:
+    //type -> RGB 
+    Eigen::Vector3f get_color() const;
+private:
     Eigen::AngleAxisd rotation_x;
     Eigen::AngleAxisd rotation_y;
     Eigen::AngleAxisd rotation_z;
-    std::string type;
+    Type type;
     int id;
-public:
     Eigen::AlignedBox3d bounding_box;
-    Box(int id, const pt::ptree& root); 
-    const Eigen::Vector3d translation() const {
-        return bounding_box.min();
-    }
-    const Eigen::Quaterniond rotation() const {
-        return rotation_x * rotation_y * rotation_z;
-    }
-    double depth() const {
-        return (bounding_box.max() - bounding_box.min())(0);
-    }
-    double width() const {
-        return (bounding_box.max() - bounding_box.min())(1);
-    }
-    double height() const {
-        return (bounding_box.max() - bounding_box.min())(2);
-    }
-    const std::string id_str() const {
-        std::stringstream ss;
-        ss << type << "-" << id;
-        return ss.str();
-    }
-    std::string debug_string() const;
+public:
     typedef boost::shared_ptr<Box> Ptr;
     friend class BoxFilter;
 };

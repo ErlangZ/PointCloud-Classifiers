@@ -13,10 +13,18 @@ namespace perception {
 
 class LabelsReader {
 public:
+    typedef boost::unordered_map<std::string, Label::Ptr>::iterator Iter;
+public:
     bool init(const std::string& file_name);
-
+    
     const Label::Ptr& get(const std::string& pcd_file_name) const {
         return _labels[pcd_file_name];
+    }
+    const Iter begin() {
+        return _labels.begin();
+    }
+    const Iter end() {
+        return _labels.end();
     }
 private:
     std::string _labels_file_name;

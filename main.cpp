@@ -32,23 +32,6 @@ void show_box(const std::string&pcd_file_name, const Label::Ptr& label, pcl::vis
 
 int main() {
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
-
-    //Read Point Cloud from File
-    pcl::PCDReader file_reader;
-    std::string pcd_file_name =  "QB9178_12_1461753402_1461753702_3641.pcd";
-    pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud(new pcl::PointCloud<pcl::PointXYZ>); //Point Cloud MonochromeCloud(pcl::PointCloud<pcl::PointXYZ>)
-    Eigen::Vector4f origin;          //sensor acquistion origin
-    Eigen::Quaternionf orientation;  //the sensor acquistion orientation
-    int file_version = 0;            //file version 
-    int offset = 0;                  //[input] offset, you may change this when read from tar file.
-
-    int ret = file_reader.read(data_root + pcd_file_name, *point_cloud, offset);
-    if (ret != 0) {
-        std::cerr << "file:" << data_root + pcd_file_name << " open failed. ret:" << ret << std::endl;
-        return -1;
-    }
-    std::cout << "Open file:" << data_root + pcd_file_name << " file_version:" << file_version << std::endl;
-
     //Read Cubes from File.
     std::string label_file_name = "/home/erlangz/3D_point_cloud/0711/groundtruth/result.txt";
     adu::perception::LabelsReader labels_reader;
@@ -57,25 +40,45 @@ int main() {
         return -1;
     }
     
-    BOOST_AUTO(label, labels_reader.get(pcd_file_name));
-    //Show Point Cloud on the Screen
-    pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
+    adu::perception::LabelsReader::Iter iter = labels_reader.begin();
+    while(iter != labels_reader.end()) {
+        const std::string& pcd_file_name = iter->first;
+        const Label::Ptr label = iter->second;
 
-    //Filter Points in Box
-    pcl::PointIndices::Ptr all_in_boxes = pcl::PointIndices::Ptr(new pcl::PointIndices);
-    for (size_t i = 0; i < label->boxes.size(); i++) {
-        const Box::Ptr& box = label->boxes[i];
-        BOOST_AUTO(point, adu::perception::BoxFilter::filter(point_cloud, *box));
-        all_in_boxes->indices.insert(all_in_boxes->indices.end(), point->indices.begin(), point->indices.end());
-    }
-    std::cout << "Point Num:" << all_in_boxes->indices.size() << std::endl;
-    point_cloud = adu::perception::BoxFilter::filter(point_cloud, all_in_boxes);
-   
+        pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud(new pcl::PointCloud<pcl::PointXYZ>); //Point Cloud MonochromeCloud(pcl::PointCloud<pcl::PointXYZ>)
+        Eigen::Vector4f origin;          //sensor acquistion origin
+        Eigen::Quaternionf orientation;  //the sensor acquistion orientation
+        int file_version = 0;            //file version 
+        int offset = 0;                  //[input] offset, you may change this when read from tar file.
 
-    cloud_viewer.showCloud(point_cloud);
-    cloud_viewer.runOnVisualizationThreadOnce(boost::bind(&show_box, pcd_file_name, label, _1));
-    
-    while(!cloud_viewer.wasStopped()) {
+        //Read Point Cloud from File
+        pcl::PCDReader file_reader;
+        int ret = file_reader.read(data_root + pcd_file_name, *point_cloud, offset);
+        if (ret != 0) {
+            std::cerr << "file:" << data_root + pcd_file_name << " open failed. ret:" << ret << std::endl;
+            return -1;
+        }
+        std::cout << "Open file:" << data_root + pcd_file_name << " file_version:" << file_version << std::endl;
+       
+        //Show Point Cloud on the Screen
+        pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
+ 
+        //Filter Points in Box
+        pcl::PointIndices::Ptr all_in_boxes = pcl::PointIndices::Ptr(new pcl::PointIndices);
+        for (size_t i = 0; i < label->boxes.size(); i++) {
+            const Box::Ptr& box = label->boxes[i];
+            BOOST_AUTO(point, adu::perception::BoxFilter::filter(point_cloud, *box));
+            all_in_boxes->indices.insert(all_in_boxes->indices.end(), point->indices.begin(), point->indices.end());
+        }
+        std::cout << "Point Num:" << all_in_boxes->indices.size() << std::endl;
+        point_cloud = adu::perception::BoxFilter::filter(point_cloud, all_in_boxes);
+       
+ 
+        cloud_viewer.showCloud(point_cloud);
+        cloud_viewer.runOnVisualizationThreadOnce(boost::bind(&show_box, pcd_file_name, label, _1));
+        
+        while(!cloud_viewer.wasStopped()) {
+        }
     }
     return 0;
 }

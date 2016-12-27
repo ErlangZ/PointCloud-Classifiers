@@ -45,6 +45,15 @@ int main() {
     //Show Point Cloud on the Screen
     pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
 
+    //Filter Points in Box
+    pcl::PointIndices::Ptr all_in_boxes = pcl::PointIndices::Ptr(new pcl::PointIndices);
+    for (const auto& box: label->boxes) {
+        const auto point = adu::perception::BoxFilter::filter(point_cloud, *box);
+        all_in_boxes->indices.insert(all_in_boxes->indices.end(), point->indices.begin(), point->indices.end());
+    }
+    point_cloud = adu::perception::BoxFilter::filter(point_cloud, all_in_boxes);
+   
+
     cloud_viewer.showCloud(point_cloud);
     cloud_viewer.runOnVisualizationThreadOnce([&label,&pcd_file_name](pcl::visualization::PCLVisualizer& viewer) {
         viewer.setBackgroundColor(0, 0, 0); // set background black.

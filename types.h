@@ -66,6 +66,7 @@ public:
 };
 
 class BoxFilter {
+public:
     //filter the point cloud
     static pcl::PointIndices::Ptr filter(const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud,  const Box& box);
 

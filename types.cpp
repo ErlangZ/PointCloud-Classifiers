@@ -6,6 +6,8 @@
 
 #include "types.h" 
 
+#include <pcl/filters/extract_indices.h>
+
 namespace adu {
 namespace perception {
 
@@ -56,6 +58,18 @@ pcl::PointIndices::Ptr BoxFilter::filter(const pcl::PointCloud<pcl::PointXYZ>::P
         }
     }
     return indice;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr BoxFilter::filter(
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr& point_cloud, 
+        const pcl::PointIndices::Ptr& point_indice) {
+    pcl::ExtractIndices<pcl::PointXYZ> eifilter(true);
+    eifilter.setInputCloud(point_cloud);
+    eifilter.setIndices(point_indice);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_point(new pcl::PointCloud<pcl::PointXYZ>);
+    eifilter.filter(*output_point);
+    return output_point;
 }
 
 Label::Label(const std::string& file, const pt::ptree& root) {

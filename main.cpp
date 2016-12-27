@@ -25,7 +25,11 @@ void show_box(const std::string&pcd_file_name, const Label::Ptr& label, pcl::vis
     }
     for (size_t i = 0; i < label->boxes.size(); i++) {
         const Box::Ptr& box = label->boxes[i];
-        viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth(), box->id_str());
+        viewer.addCube(box->bounding_box.min().x(), box->bounding_box.max().x(), 
+                       box->bounding_box.min().y(), box->bounding_box.max().y(), 
+                       box->bounding_box.min().z(), box->bounding_box.max().z(), 
+                       1.0, 0.0, 0.0,
+                       box->id_str());
         std::cout << "Add Box:" << box->debug_string() << std::endl;
     }
 };

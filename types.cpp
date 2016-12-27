@@ -22,16 +22,14 @@ Box::Box(int id_, const pt::ptree& root) {
     rotation_x = Eigen::AngleAxisd(r.get<double>("theta"), Eigen::Vector3d::UnitX());
     rotation_y = Eigen::AngleAxisd(r.get<double>("psi"), Eigen::Vector3d::UnitY());
 
-    //AlignedBox 
-    BOOST_AUTO(t, root.get_child("position"));
-    Eigen::Translation3d top = Eigen::Translation3d(t.get<double>("x"), t.get<double>("y"), t.get<double>("z"));
     std::vector<double> size;
     BOOST_FOREACH(const pt::ptree::value_type& item, root.get_child("size")) {
         size.push_back(item.second.get_value<double>());
     }
-    Eigen::Translation3d bottom = Eigen::Translation3d(top.x() + size[2], top.y() + size[0], top.z() + size[1]);
-    bounding_box = Eigen::AlignedBox3d(Eigen::Vector3d(top.x(), top.y(), top.z()),
-                                       Eigen::Vector3d(bottom.x(), bottom.y(), bottom.z()));
+    //AlignedBox 
+    BOOST_AUTO(center, root.get_child("position"));
+    bounding_box = Eigen::AlignedBox3d(Eigen::Vector3d(center.get<double>("x") - size[0]/2, center.get<double>("y") - size[1]/2, center.get<double>("z") - size[2]/2),
+                                       Eigen::Vector3d(center.get<double>("x") + size[0]/2, center.get<double>("y") + size[1]/2, center.get<double>("z") + size[2]/2));
 
     //Type
     type = root.get<std::string>("type");
@@ -54,18 +52,20 @@ pcl::PointIndices::Ptr BoxFilter::filter(const pcl::PointCloud<pcl::PointXYZ>::P
     pcl::PointIndices::Ptr indice(new pcl::PointIndices);
     for (size_t i = 0; i < point_cloud->size(); i++) {
         //std::cout << "exteriorDistance:" << box.bounding_box.exteriorDistance(Eigen::Vector3d(point.x, point.y, point.z)) << std::endl;
-        if (box.bounding_box.exteriorDistance(Eigen::Vector3d(point_cloud->at(i).x, point_cloud->at(i).y, point_cloud->at(i).z)) < 0.5) {
-        /*
-        Eigen::Vector3d point(point_cloud->at(i).x, point_cloud->at(i).y, point_cloud->at(i).z);
-        if (point(0) >= box.bounding_box.min()(0, 0) && \
-            point(1) >= box.bounding_box.min()(1, 0) && \
-            point(2) >= box.bounding_box.min()(2, 0) && \
-            point(0) <= box.bounding_box.max()(0, 0) && \
-            point(1) <= box.bounding_box.max()(1, 0) && \
-            point(2) <= box.bounding_box.max()(2, 0)) {
-            std::cout << "Point:" << point << " BoundingBox:(min:" << box.bounding_box.min() << ", max:" << box.bounding_box.max() << std::endl;
-        */
-            //the point in the bounding_box
+        if (box.bounding_box.exteriorDistance(Eigen::Vector3d(point_cloud->at(i).x, point_cloud->at(i).y, point_cloud->at(i).z)) == 0) {
+            /*
+            if (!(point_cloud->at(i).x >= box.bounding_box.min()(0, 0) && \
+                point_cloud->at(i).y >= box.bounding_box.min()(1, 0) && \
+                point_cloud->at(i).z >= box.bounding_box.min()(2, 0) && \
+                point_cloud->at(i).x <= box.bounding_box.max()(0, 0) && \
+                point_cloud->at(i).y <= box.bounding_box.max()(1, 0) && \
+                point_cloud->at(i).z <= box.bounding_box.max()(2, 0))) {
+                std::cout << "Outside Point:" << point_cloud->at(i) << " BoundingBox:(min:" << box.bounding_box.min() << ", max:" << box.bounding_box.max() << std::endl;
+                //the point in the bounding_box
+            } else {
+                indice->indices.push_back(i);
+            }
+            */
             indice->indices.push_back(i);
         }
     }

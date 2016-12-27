@@ -34,10 +34,10 @@ class Box {
     Eigen::AngleAxisd rotation_x;
     Eigen::AngleAxisd rotation_y;
     Eigen::AngleAxisd rotation_z;
-    Eigen::AlignedBox3d bounding_box;
     std::string type;
     int id;
 public:
+    Eigen::AlignedBox3d bounding_box;
     Box(int id, const pt::ptree& root); 
     const Eigen::Vector3d translation() const {
         return bounding_box.min();

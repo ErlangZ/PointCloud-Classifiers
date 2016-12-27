@@ -14,8 +14,23 @@
 #include "types.h"
 #include "label_reader.h"
 
+using adu::perception::Box;
+using adu::perception::Label;
+
+void show_box(const std::string&pcd_file_name, const Label::Ptr& label, pcl::visualization::PCLVisualizer& viewer) {
+    viewer.setBackgroundColor(0, 0, 0); // set background black.
+    if (!label) {
+        std::cerr << "Labels in pcd_file:" << pcd_file_name << " open failed."<< std::endl;
+        return;
+    }
+    for (size_t i = 0; i < label->boxes.size(); i++) {
+        const Box::Ptr& box = label->boxes[i];
+        viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth(), box->id_str());
+        std::cout << "Add Box:" << box->debug_string() << std::endl;
+    }
+};
+
 int main() {
-    using adu::perception::Box;
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
 
     //Read Point Cloud from File
@@ -53,24 +68,12 @@ int main() {
         BOOST_AUTO(point, adu::perception::BoxFilter::filter(point_cloud, *box));
         all_in_boxes->indices.insert(all_in_boxes->indices.end(), point->indices.begin(), point->indices.end());
     }
+    std::cout << "Point Num:" << all_in_boxes->indices.size() << std::endl;
     point_cloud = adu::perception::BoxFilter::filter(point_cloud, all_in_boxes);
    
 
     cloud_viewer.showCloud(point_cloud);
-    /*
-    cloud_viewer.runOnVisualizationThreadOnce([&label,&pcd_file_name](pcl::visualization::PCLVisualizer& viewer) {
-        viewer.setBackgroundColor(0, 0, 0); // set background black.
-        if (!label) {
-            std::cerr << "Labels in pcd_file:" << pcd_file_name << " open failed."<< std::endl;
-            return;
-        }
-        for (size_t i = 0; i < label->boxes.size(); i++) {
-            const Box::Ptr& box = label->boxes[i];
-            viewer.addCube(box->translation().cast<float>(), box->rotation().cast<float>(), box->width(), box->height(), box->depth(), box->id_str());
-            std::cout << "Add Box:" << box->debug_string() << std::endl;
-        }
-    });
-    */
+    cloud_viewer.runOnVisualizationThreadOnce(boost::bind(&show_box, pcd_file_name, label, _1));
     
     while(!cloud_viewer.wasStopped()) {
     }

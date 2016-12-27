@@ -7,5 +7,9 @@ build_code:
 		-lpcl_visualization \
 		-lpcl_filters \
 		-lpcl_sample_consensus \
+		-lopencv_core \
+		-lopencv_features2d \
+		-lopencv_objdetect \
+		-lopencv_highgui \
 		-lboost_system \
 		-o build/main 

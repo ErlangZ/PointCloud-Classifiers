@@ -11,6 +11,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include "feature.h"
 #include "types.h"
 #include "label_reader.h"
 
@@ -52,8 +53,8 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
     pcl::PointIndices::Ptr all_in_boxes = pcl::PointIndices::Ptr(new pcl::PointIndices);
     for (size_t i = 0; i < label->boxes.size(); i++) {
         const Box::Ptr& box = label->boxes[i];
-        BOOST_AUTO(point, adu::perception::BoxFilter::filter(point_cloud, *box));
-        all_in_boxes->indices.insert(all_in_boxes->indices.end(), point->indices.begin(), point->indices.end());
+        BOOST_AUTO(object, adu::perception::BoxFilter::filter(point_cloud, *box));
+        all_in_boxes->indices.insert(all_in_boxes->indices.end(), object->indices.begin(), object->indices.end());
     }
     std::cout << "Point Num:" << all_in_boxes->indices.size() << std::endl;
     point_cloud = adu::perception::BoxFilter::filter(point_cloud, all_in_boxes);
@@ -62,6 +63,27 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
     
     while(!cloud_viewer.wasStopped()) {
     }
+}
+
+void draw_hog_features(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const Label::Ptr label) {
+    adu::perception::HogFeature hog_feature;
+    for (size_t i = 0; i < label->boxes.size(); i++) {
+        const Box::Ptr& box = label->boxes[i];
+        BOOST_AUTO(object_indices, adu::perception::BoxFilter::filter(point_cloud, *box));
+        BOOST_AUTO(object, adu::perception::BoxFilter::filter(point_cloud, object_indices));
+        
+        boost::shared_ptr<std::vector<double> > data1 = hog_feature.new_data();
+        cv::Mat x_image = hog_feature.get_image_in_dim(*data1, object, 1, 2);
+        cv::imshow("X-axis", x_image);
+        boost::shared_ptr<std::vector<double> > data2 = hog_feature.new_data();
+        cv::Mat y_image = hog_feature.get_image_in_dim(*data2, object, 0, 2);
+        cv::imshow("Y-axis", y_image);
+        boost::shared_ptr<std::vector<double> > data3 = hog_feature.new_data();
+        cv::Mat z_image = hog_feature.get_image_in_dim(*data3, object, 0, 1);
+        cv::imshow("Z-axis", z_image);
+        cv::waitKey(0); 
+    }
+
 }
 
 int main() {
@@ -81,7 +103,8 @@ int main() {
         pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = read_pcd(data_root + pcd_file_name);        
         if (!point_cloud) { return -1; }
 
-        draw_point_cloud_and_bounding_box(point_cloud, label);
+        //draw_point_cloud_and_bounding_box(point_cloud, label);
+        draw_hog_features(point_cloud, label); 
         iter++;
     }
     return 0;

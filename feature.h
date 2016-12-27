@@ -19,9 +19,14 @@ public:
     bool compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                  const int dim,
                  std::vector<float>* hog_feature);
-private:
-    cv::Mat get_image_in_dim(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
+    cv::Mat get_image_in_dim(std::vector<double>& grid,
+                             const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                              int dim1, int dim2);
+    boost::shared_ptr<std::vector<double> > new_data() {
+        int length = _image_size.height * _image_size.width;
+        return boost::shared_ptr<std::vector<double> >(new std::vector<double>(length, 0.0));
+    }
+private:
     std::pair<double, double> find_min_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                              int dim);
     int get_coord_on_image(const pcl::PointXYZ& point, 

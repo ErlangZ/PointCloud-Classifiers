@@ -5,7 +5,9 @@
 // @brief 
 // 
 #include "feature.h"
-#include <cstdlib>
+
+#include <vector>
+
 namespace adu {
 namespace perception {
 
@@ -14,12 +16,9 @@ HogFeature::HogFeature() :
     
 }
 
-cv::Mat HogFeature::get_image_in_dim(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
+cv::Mat HogFeature::get_image_in_dim(std::vector<double>& grid,
+                                     const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                                      int dim1, int dim2) {
-    int length = _image_size.height * _image_size.width;
-    double grid[length];
-    memset(grid, 0, sizeof(grid));
-
     std::pair<double, double> u_min_max = find_min_max(object, dim1);
     std::pair<double, double> v_min_max = find_min_max(object, dim2);
     for (size_t i = 0; i < object->points.size(); i++) {
@@ -27,12 +26,12 @@ cv::Mat HogFeature::get_image_in_dim(const pcl::PointCloud<pcl::PointXYZ>::Ptr o
         int v = get_coord_on_image(object->points[i], dim2, v_min_max.first, v_min_max.second, _image_size.width);
         grid[u * _image_size.height + v] += 1.0;
     }
-    double* max_value = std::max_element(grid, grid + length);
-    for (size_t i = 0; i < length; i++) {
+    std::vector<double>::iterator max_value = std::max_element(grid.begin(), grid.end());
+    for (size_t i = 0; i < grid.size(); i++) {
         grid[i] = grid[i] / (*max_value) * 255.0;
     }
 
-    cv::Mat image = cv::Mat(_image_size.height, _image_size.width, CV_64FC1, grid);
+    return cv::Mat(_image_size.height, _image_size.width, CV_64FC1, grid.data());
 }
 
 std::pair<double, double> HogFeature::find_min_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
@@ -57,7 +56,7 @@ std::pair<double, double> HogFeature::find_min_max(const pcl::PointCloud<pcl::Po
 int HogFeature::get_coord_on_image(const pcl::PointXYZ& point, 
                                    int dim, double min, double max, int columns) {
     double value = get_dim(point, dim);
-    return (value - min) / (max - min) * columns; 
+    return (value - min) / (max - min) * (columns-1); 
 }
 
 

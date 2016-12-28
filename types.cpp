@@ -61,6 +61,16 @@ void Box::show(pcl::visualization::PCLVisualizer& viewer) {
                    id_str());
 }
 
+std::string Box::type_str() const {
+    switch (type) {
+        case smallMot: return "smallMot";
+        case midMot: return "midMot";
+        case bigMot: return "bigMot"; 
+        case nonMot: return "nonMot";
+        case pedestrian: return "pedestrian";
+        case unknown: return "unknown";
+    }
+}
 const std::string Box::id_str() const {
     std::stringstream ss;
     ss << type << "-" << id;

@@ -42,6 +42,7 @@ public:
     Box(int id, const pt::ptree& root); 
     void show(pcl::visualization::PCLVisualizer& viewer);
     const std::string id_str() const;
+    std::string type_str() const;
     std::string debug_string() const;
 private:
     //type -> RGB 

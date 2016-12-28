@@ -5,13 +5,14 @@
 // @brief 
 // 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/cloud_viewer.h>
 
-#include "feature.h"
+#include "hog_feature.h"
 #include "types.h"
 #include "label_reader.h"
 
@@ -65,7 +66,8 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
     }
 }
 
-bool draw_hog_features(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const Label::Ptr label) {
+bool draw_hog_features(std::vector<boost::shared_ptr<std::ofstream> >& oss, 
+                       pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const Label::Ptr label) {
     adu::perception::HogFeature hog_feature;
     for (size_t i = 0; i < label->boxes.size(); i++) {
         const Box::Ptr& box = label->boxes[i];
@@ -77,10 +79,8 @@ bool draw_hog_features(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const La
             std::cerr << "Compute Object HogFeature failed, Box:" << box->debug_string() << std::endl;
             return false;
         }
-        std::cout << "Box:" << box->debug_string() << std::endl ;
-        for (int i = 0; i < features.size(); i++) {
-            //std::cout << " HogFeature:(" << i << ")" << Eigen::Map<Eigen::VectorXf>(features[i].data(), features[i].size()) << std::endl;
-            std::cout << " HogFeature:(" << i << ") size:" << features[i].size() << std::endl;
+        for (size_t i = 0; i < features.size(); i++) {
+            hog_feature.serialize(*oss[i], box->type_str(), features[i]);
         }
     }
     return true;
@@ -96,6 +96,18 @@ int main() {
         return -1;
     }
     
+    std::vector<boost::shared_ptr<std::ofstream> > oss(3);
+    for (int i = 0; i < oss.size(); i++) {
+        oss[i] = boost::shared_ptr<std::ofstream>(new std::ofstream);
+        std::stringstream file_name;
+        file_name << "./features-" << ('X'+i);
+        oss[i]->open(file_name.str().c_str(), std::ios_base::out);
+        if (!(*oss[i])) {
+            std::cerr << "Open Output file:" << file_name << std::endl;
+            return -1;
+        }
+    }
+
     adu::perception::LabelsReader::Iter iter = labels_reader.begin();
     while(iter != labels_reader.end()) {
         const std::string& pcd_file_name = iter->first;
@@ -104,8 +116,11 @@ int main() {
         if (!point_cloud) { return -1; }
 
         //draw_point_cloud_and_bounding_box(point_cloud, label);
-        draw_hog_features(point_cloud, label); 
+        draw_hog_features(oss, point_cloud, label); 
         iter++;
+    }
+    for (int i = 0; i < oss.size(); i++) {
+        oss[i]->close();
     }
     return 0;
 }

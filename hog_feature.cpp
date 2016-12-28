@@ -4,7 +4,7 @@
 // @file feature.cpp
 // @brief 
 // 
-#include "feature.h"
+#include "hog_feature.h"
 
 #include <vector>
 
@@ -12,7 +12,7 @@ namespace adu {
 namespace perception {
 
 HogFeature::HogFeature() : 
-    _image_size(600, 600),
+    _image_size(300, 300),
     //  winSize, BlockSize, BlockStride, CellSize, CellBins
     _hog(cv::Size(60, 60), cv::Size(30, 30), cv::Size(10, 10), cv::Size(10, 10), 6) {
     
@@ -20,6 +20,9 @@ HogFeature::HogFeature() :
 
 bool HogFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
                          std::vector<std::vector<float> >* hog_features) {
+    if (object->points.size() < 10) {
+        return false;
+    }
     //X-axis, Y-axis, Z-axis 
     hog_features->resize(3);
 
@@ -47,6 +50,7 @@ cv::Mat HogFeature::get_image_in_dim(std::vector<unsigned char>& grid,
     std::vector<double> temp_grid(grid.size(), 0.0);
     std::pair<double, double> u_min_max = find_min_max(object, dim1);
     std::pair<double, double> v_min_max = find_min_max(object, dim2);
+
     for (size_t i = 0; i < object->points.size(); i++) {
         int u = get_coord_on_image(object->points[i], dim1, u_min_max.first, u_min_max.second,_image_size.height);
         int v = get_coord_on_image(object->points[i], dim2, v_min_max.first, v_min_max.second, _image_size.width);
@@ -85,6 +89,18 @@ int HogFeature::get_coord_on_image(const pcl::PointXYZ& point,
     return (value - min) / (max - min) * (columns-1); 
 }
 
+void HogFeature::serialize(std::ostream& os, const std::string& type, 
+               const std::vector<float>& features) {
+    os << type << "\t";
+    for (int i = 0; i < features.size(); i++) {
+        os << features[i];
+        if (i != features.size() - 1) {
+            os << "\t";
+        } else {
+            os << std::endl;
+        }
+    }
+}
 
 }
 }

@@ -17,16 +17,17 @@ class HogFeature {
 public:
     HogFeature();
     bool compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
-                 const int dim,
-                 std::vector<float>* hog_feature);
-    cv::Mat get_image_in_dim(std::vector<double>& grid,
+                 std::vector<std::vector<float> >* hog_features);
+private:
+    bool compute_hog(const cv::Mat image, std::vector<float>* hog_feature);
+    //@brief Project PointCloud on Image
+    cv::Mat get_image_in_dim(std::vector<unsigned char>& grid,
                              const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                              int dim1, int dim2);
-    boost::shared_ptr<std::vector<double> > new_data() {
+    boost::shared_ptr<std::vector<unsigned char> > new_data() {
         int length = _image_size.height * _image_size.width;
-        return boost::shared_ptr<std::vector<double> >(new std::vector<double>(length, 0.0));
+        return boost::shared_ptr<std::vector<unsigned char> >(new std::vector<unsigned char>(length, 0));
     }
-private:
     std::pair<double, double> find_min_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                              int dim);
     int get_coord_on_image(const pcl::PointXYZ& point, 

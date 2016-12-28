@@ -65,25 +65,25 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
     }
 }
 
-void draw_hog_features(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const Label::Ptr label) {
+bool draw_hog_features(pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const Label::Ptr label) {
     adu::perception::HogFeature hog_feature;
     for (size_t i = 0; i < label->boxes.size(); i++) {
         const Box::Ptr& box = label->boxes[i];
         BOOST_AUTO(object_indices, adu::perception::BoxFilter::filter(point_cloud, *box));
         BOOST_AUTO(object, adu::perception::BoxFilter::filter(point_cloud, object_indices));
         
-        boost::shared_ptr<std::vector<double> > data1 = hog_feature.new_data();
-        cv::Mat x_image = hog_feature.get_image_in_dim(*data1, object, 1, 2);
-        cv::imshow("X-axis", x_image);
-        boost::shared_ptr<std::vector<double> > data2 = hog_feature.new_data();
-        cv::Mat y_image = hog_feature.get_image_in_dim(*data2, object, 0, 2);
-        cv::imshow("Y-axis", y_image);
-        boost::shared_ptr<std::vector<double> > data3 = hog_feature.new_data();
-        cv::Mat z_image = hog_feature.get_image_in_dim(*data3, object, 0, 1);
-        cv::imshow("Z-axis", z_image);
-        cv::waitKey(0); 
+        std::vector<std::vector<float> > features;
+        if (!hog_feature.compute(object, &features)) {
+            std::cerr << "Compute Object HogFeature failed, Box:" << box->debug_string() << std::endl;
+            return false;
+        }
+        std::cout << "Box:" << box->debug_string() << std::endl ;
+        for (int i = 0; i < features.size(); i++) {
+            //std::cout << " HogFeature:(" << i << ")" << Eigen::Map<Eigen::VectorXf>(features[i].data(), features[i].size()) << std::endl;
+            std::cout << " HogFeature:(" << i << ") size:" << features[i].size() << std::endl;
+        }
     }
-
+    return true;
 }
 
 int main() {

@@ -79,6 +79,7 @@ bool draw_hog_features(std::vector<boost::shared_ptr<std::ofstream> >& oss,
             std::cerr << "Compute Object HogFeature failed, Box:" << box->debug_string() << std::endl;
             return false;
         }
+#pragma omp for
         for (size_t i = 0; i < features.size(); i++) {
             hog_feature.serialize(*oss[i], box->type_str(), features[i]);
         }

@@ -57,6 +57,7 @@ cv::Mat HogFeature::get_image_in_dim(std::vector<unsigned char>& grid,
         temp_grid[u * _image_size.height + v] += 1.0;
     }
     std::vector<double>::iterator max_value = std::max_element(temp_grid.begin(), temp_grid.end());
+#pragma omp for
     for (size_t i = 0; i < temp_grid.size(); i++) {
         grid[i] = temp_grid[i] / (*max_value) * 255.0;
     }

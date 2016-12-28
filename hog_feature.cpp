@@ -26,21 +26,28 @@ bool HogFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
     //X-axis, Y-axis, Z-axis 
     hog_features->resize(3);
 
-    boost::shared_ptr<std::vector<unsigned char> > data1 = new_data();
-    cv::Mat x_image = get_image_in_dim(*data1, object, 1, 2);
     boost::shared_ptr<std::vector<unsigned char> > data2 = new_data();
-    cv::Mat y_image = get_image_in_dim(*data2, object, 0, 2);
     boost::shared_ptr<std::vector<unsigned char> > data3 = new_data();
-    cv::Mat z_image = get_image_in_dim(*data3, object, 0, 1);
+#pragma omp parallel for
+    for (size_t i = 0; i < 3; i++) {
+        boost::shared_ptr<std::vector<unsigned char> > data = new_data();
+        if (i == 0) {
+            cv::Mat image = get_image_in_dim(*data, object, 1, 2);
+            _hog.compute(image, hog_features->at(i));
+        } else if (i == 1) {
+            cv::Mat image = get_image_in_dim(*data, object, 0, 2);
+            _hog.compute(image, hog_features->at(i));
+        } else {
+            cv::Mat image = get_image_in_dim(*data, object, 0, 1);
+            _hog.compute(image, hog_features->at(i));
+        }
+    }
 #ifdef SHOW_XYZ_PRO_IMAGE
     cv::imshow("X-axis", x_image);
     cv::imshow("Y-axis", y_image);
     cv::imshow("Z-axis", z_image);
     cv::waitKey(0); 
 #endif
-    _hog.compute(x_image, hog_features->at(0));
-    _hog.compute(y_image, hog_features->at(1));
-    _hog.compute(z_image, hog_features->at(2));
     return true;
 }
 
@@ -57,6 +64,7 @@ cv::Mat HogFeature::get_image_in_dim(std::vector<unsigned char>& grid,
         temp_grid[u * _image_size.height + v] += 1.0;
     }
     std::vector<double>::iterator max_value = std::max_element(temp_grid.begin(), temp_grid.end());
+#pragma omp parallel for
     for (size_t i = 0; i < temp_grid.size(); i++) {
         grid[i] = temp_grid[i] / (*max_value) * 255.0;
     }

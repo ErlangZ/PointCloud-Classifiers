@@ -39,7 +39,7 @@ enum Type {
 
 class Box {
 public:
-    Box(int id, const pt::ptree& root); 
+    Box(const std::string& file, int id, const pt::ptree& root); 
     void show(pcl::visualization::PCLVisualizer& viewer);
     const std::string id_str() const;
     std::string type_str() const;
@@ -53,6 +53,7 @@ private:
     Eigen::AngleAxisd rotation_z;
     Type type;
     int id;
+    std::string file;
     Eigen::AlignedBox3d bounding_box;
 public:
     typedef boost::shared_ptr<Box> Ptr;

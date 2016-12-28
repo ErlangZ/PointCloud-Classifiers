@@ -12,9 +12,9 @@ namespace adu {
 namespace perception {
 
 HogFeature::HogFeature() : 
-    _image_size(300, 300),
+    _image_size(160, 160),
     //  winSize, BlockSize, BlockStride, CellSize, CellBins
-    _hog(cv::Size(60, 60), cv::Size(30, 30), cv::Size(10, 10), cv::Size(10, 10), 6) {
+    _hog(cv::Size(80, 80), cv::Size(20, 20), cv::Size(10, 10), cv::Size(10, 10), 6) {
     
 }
 
@@ -97,9 +97,9 @@ int HogFeature::get_coord_on_image(const pcl::PointXYZ& point,
     return (value - min) / (max - min) * (columns-1); 
 }
 
-void HogFeature::serialize(std::ostream& os, const std::string& type, 
+void HogFeature::serialize(std::ostream& os, const std::string& id ,const std::string& type, 
                const std::vector<float>& features) {
-    os << type << "\t";
+    os << id <<"\t" << type << "\t";
     for (int i = 0; i < features.size(); i++) {
         os << features[i];
         if (i != features.size() - 1) {

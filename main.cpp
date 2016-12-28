@@ -81,7 +81,7 @@ bool draw_hog_features(std::vector<boost::shared_ptr<std::ofstream> >& oss,
         }
 #pragma omp parallel for
         for (size_t i = 0; i < features.size(); i++) {
-            hog_feature.serialize(*oss[i], box->type_str(), features[i]);
+            hog_feature.serialize(*oss[i], box->id_str(), box->type_str(), features[i]);
         }
     }
     return true;

@@ -13,7 +13,8 @@
 namespace adu {
 namespace perception {
 
-Box::Box(int id_, const pt::ptree& root) {
+Box::Box(const std::string& file_, int id_, const pt::ptree& root) {
+    file = file_;
     id = id_;
     //Rotation 
     BOOST_AUTO(r, root.get_child("rotation"));
@@ -68,12 +69,14 @@ std::string Box::type_str() const {
         case bigMot: return "bigMot"; 
         case nonMot: return "nonMot";
         case pedestrian: return "pedestrian";
-        case unknown: return "unknown";
+        case cluster: return "cluster";
+        default: 
+             return "unknown";
     }
 }
 const std::string Box::id_str() const {
     std::stringstream ss;
-    ss << type << "-" << id;
+    ss << file << "-" << type << "-" << id;
     return ss.str();
 }
 
@@ -84,6 +87,7 @@ Eigen::Vector3f Box::get_color() const {
         case bigMot: return Eigen::Vector3f(0.0, 0.9, 0.0);
         case nonMot: return Eigen::Vector3f(0.0, 0.7, 0.0);
         case pedestrian: return Eigen::Vector3f(1.0, 0.0, 0.0);
+        case cluster: return Eigen::Vector3f(0.0, 0.5, 0.5);
         case unknown: return Eigen::Vector3f(0.0, 0.0, 1.0);
     }
 }
@@ -121,7 +125,7 @@ Label::Label(const std::string& file, const pt::ptree& root) {
     file_name = file; 
     int i = 0;
     BOOST_FOREACH(const pt::ptree::value_type& result, root.get_child("result")) {
-        boxes.push_back(Box::Ptr(new Box(i++, result.second))); 
+        boxes.push_back(Box::Ptr(new Box(file_name, i++, result.second))); 
     }
 }
 

@@ -23,6 +23,7 @@ public:
     bool compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                  std::vector<std::vector<float> >* hog_features);
     void serialize(std::ostream& os, 
+                   const std::string& id,
                    const std::string& type, const std::vector<float>& features);
 private:
     bool compute_hog(const cv::Mat image, std::vector<float>* hog_feature);

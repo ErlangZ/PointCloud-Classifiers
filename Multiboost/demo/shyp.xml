@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<multiboost>
+	<algo>SingleStumpLearner</algo>
+	<weakhyp iter="0">
+		<weakLearner>SingleStumpLearner</weakLearner>
+		<alpha>0.422698811143</alpha>
+		<vArray size="2">
+			<default>0</default>
+			<class id="+">-1</class>
+			<class id="-">1</class>
+		</vArray>
+		<column>a0</column>
+		<threshold>0.700000047684</threshold>
+	</weakhyp>
+	<!-- ################################## -->
+	<weakhyp iter="1">
+		<weakLearner>SingleStumpLearner</weakLearner>
+		<alpha>0.647347502321</alpha>
+		<vArray size="2">
+			<default>0</default>
+			<class id="+">1</class>
+			<class id="-">-1</class>
+		</vArray>
+		<column>a1</column>
+		<threshold>0.649999976158</threshold>
+	</weakhyp>
+	<!-- ################################## -->
+	<weakhyp iter="2">
+		<weakLearner>SingleStumpLearner</weakLearner>
+		<alpha>0.918171884936</alpha>
+		<vArray size="2">
+			<default>0</default>
+			<class id="+">-1</class>
+			<class id="-">1</class>
+		</vArray>
+		<column>a0</column>
+		<threshold>0.25</threshold>
+	</weakhyp>
+	<!-- ################################## -->
+</multiboost>

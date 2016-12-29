@@ -14,20 +14,12 @@ namespace perception {
 HogFeature::HogFeature() : 
     _image_size(160, 160),
     //  winSize, BlockSize, BlockStride, CellSize, CellBins
-    _hog(cv::Size(80, 80), cv::Size(20, 20), cv::Size(10, 10), cv::Size(10, 10), 6) {
+    _hog(_image_size, cv::Size(40, 40), cv::Size(10, 10), cv::Size(10, 10), 6) {
     
 }
 
 bool HogFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
                          std::vector<std::vector<float> >* hog_features) {
-    if (object->points.size() < 10) {
-        return false;
-    }
-    //X-axis, Y-axis, Z-axis 
-    hog_features->resize(3);
-
-    boost::shared_ptr<std::vector<unsigned char> > data2 = new_data();
-    boost::shared_ptr<std::vector<unsigned char> > data3 = new_data();
 #pragma omp parallel for
     for (size_t i = 0; i < 3; i++) {
         boost::shared_ptr<std::vector<unsigned char> > data = new_data();
@@ -95,19 +87,6 @@ int HogFeature::get_coord_on_image(const pcl::PointXYZ& point,
                                    int dim, double min, double max, int columns) {
     double value = get_dim(point, dim);
     return (value - min) / (max - min) * (columns-1); 
-}
-
-void HogFeature::serialize(std::ostream& os, const std::string& id ,const std::string& type, 
-               const std::vector<float>& features) {
-    os << id <<"\t" << type << "\t";
-    for (int i = 0; i < features.size(); i++) {
-        os << features[i];
-        if (i != features.size() - 1) {
-            os << "\t";
-        } else {
-            os << std::endl;
-        }
-    }
 }
 
 }

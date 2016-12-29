@@ -3,8 +3,8 @@
 // @date 2016/12/27 16:48:56
 // @file feature.h
 // @brief 
-#ifndef ADU_PERCEPTION_PCD_FEATURE_H
-#define ADU_PERCEPTION_PCD_FEATURE_H
+#ifndef ADU_PERCEPTION_PCD_HOG_FEATURE_H
+#define ADU_PERCEPTION_PCD_HOG_FEATURE_H
 
 #include "types.h"
 
@@ -22,9 +22,6 @@ public:
     HogFeature();
     bool compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object, 
                  std::vector<std::vector<float> >* hog_features);
-    void serialize(std::ostream& os, 
-                   const std::string& id,
-                   const std::string& type, const std::vector<float>& features);
 private:
     bool compute_hog(const cv::Mat image, std::vector<float>* hog_feature);
     //@brief Project PointCloud on Image
@@ -55,5 +52,5 @@ private:
 
 }
 }
-#endif  // ADU_PERCEPTION_PCD_FEATURE_H
+#endif  // ADU_PERCEPTION_PCD_HOG_FEATURE_H
 

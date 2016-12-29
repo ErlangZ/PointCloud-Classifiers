@@ -12,7 +12,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/cloud_viewer.h>
 
-#include "hog_feature.h"
+#include "features.h"
 #include "types.h"
 #include "label_reader.h"
 
@@ -66,26 +66,6 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
     }
 }
 
-bool draw_hog_features(std::vector<boost::shared_ptr<std::ofstream> >& oss, 
-                       pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, const Label::Ptr label) {
-    adu::perception::HogFeature hog_feature;
-    for (size_t i = 0; i < label->boxes.size(); i++) {
-        const Box::Ptr& box = label->boxes[i];
-        BOOST_AUTO(object_indices, adu::perception::BoxFilter::filter(point_cloud, *box));
-        BOOST_AUTO(object, adu::perception::BoxFilter::filter(point_cloud, object_indices));
-        
-        std::vector<std::vector<float> > features;
-        if (!hog_feature.compute(object, &features)) {
-            std::cerr << "Compute Object HogFeature failed, Box:" << box->debug_string() << std::endl;
-            return false;
-        }
-#pragma omp parallel for
-        for (size_t i = 0; i < features.size(); i++) {
-            hog_feature.serialize(*oss[i], box->id_str(), box->type_str(), features[i]);
-        }
-    }
-    return true;
-}
 
 int main() {
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
@@ -96,32 +76,24 @@ int main() {
         std::cerr << "Open Label File:" << label_file_name << " failed." << std::endl;
         return -1;
     }
-    
-    std::vector<boost::shared_ptr<std::ofstream> > oss(3);
-    for (int i = 0; i < oss.size(); i++) {
-        oss[i] = boost::shared_ptr<std::ofstream>(new std::ofstream);
-        std::stringstream file_name;
-        file_name << "./features-" << ('X'+i);
-        oss[i]->open(file_name.str().c_str(), std::ios_base::out);
-        if (!(*oss[i])) {
-            std::cerr << "Open Output file:" << file_name << std::endl;
-            return -1;
-        }
-    }
 
     adu::perception::LabelsReader::Iter iter = labels_reader.begin();
+    adu::perception::FeatureExtractor extractor(true, "features-");
+    int count = 0;
     while(iter != labels_reader.end()) {
+        if (count++ > 10) {
+            break;
+        } else {
+            std::cout << "File-Count:"<< count; 
+        }
+
         const std::string& pcd_file_name = iter->first;
         const Label::Ptr label = iter->second;
         pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = read_pcd(data_root + pcd_file_name);        
         if (!point_cloud) { return -1; }
+        extractor.extract(point_cloud, label); 
 
-        //draw_point_cloud_and_bounding_box(point_cloud, label);
-        draw_hog_features(oss, point_cloud, label); 
         iter++;
-    }
-    for (int i = 0; i < oss.size(); i++) {
-        oss[i]->close();
     }
     return 0;
 }

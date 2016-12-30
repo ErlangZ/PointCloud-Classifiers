@@ -51,6 +51,10 @@ bool FeatureExtractor::extract(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_c
               _bounding_box_feature_extractor.compute(object, &features[3]))) {
             return false; 
         }
+#ifdef SHOW_DETAIL
+        std::cout << "Box:" << box->type_str() << " height:"<< features[3][0] << " width:" << features[3][1] << " height:" << features[3][2] << std::endl;
+#endif
+
         // Save File
         if (!_save_to_file) continue;
 #pragma omp parallel for

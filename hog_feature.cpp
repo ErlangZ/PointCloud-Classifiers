@@ -20,24 +20,32 @@ HogFeature::HogFeature() :
 
 bool HogFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
                          std::vector<std::vector<float> >* hog_features) {
+#ifndef SHOW_DETAIL
 #pragma omp parallel for
+#endif
     for (size_t i = 0; i < 3; i++) {
         boost::shared_ptr<std::vector<unsigned char> > data = new_data();
         if (i == 0) {
             cv::Mat image = get_image_in_dim(*data, object, 1, 2);
             _hog.compute(image, hog_features->at(i));
+#ifdef SHOW_DETAIL
+            cv::imshow("X-axis", image);
+#endif
         } else if (i == 1) {
             cv::Mat image = get_image_in_dim(*data, object, 0, 2);
             _hog.compute(image, hog_features->at(i));
+#ifdef SHOW_DETAIL
+            cv::imshow("Y-axis", image);
+#endif
         } else {
             cv::Mat image = get_image_in_dim(*data, object, 0, 1);
             _hog.compute(image, hog_features->at(i));
+#ifdef SHOW_DETAIL
+            cv::imshow("Z-axis", image);
+#endif
         }
     }
-#ifdef SHOW_XYZ_PRO_IMAGE
-    cv::imshow("X-axis", x_image);
-    cv::imshow("Y-axis", y_image);
-    cv::imshow("Z-axis", z_image);
+#ifdef SHOW_DETAIL
     cv::waitKey(0); 
 #endif
     return true;
@@ -70,7 +78,7 @@ std::pair<double, double> HogFeature::find_min_max(const pcl::PointCloud<pcl::Po
     double& min = result.first;
     double& max = result.second;
     min = FLT_MAX;
-    max = FLT_MIN;
+    max = -FLT_MAX;
     for (size_t i = 0; i < object->points.size(); i++) {
         const pcl::PointXYZ& point = object->points[i];
         if (min > get_dim(point, dim)) {

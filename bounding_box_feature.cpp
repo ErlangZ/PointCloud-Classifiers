@@ -16,7 +16,7 @@ bool BoundingBoxFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr objec
                                  std::vector<float>* bounding_box_feature) {
     //Get AABB
     float min_x = FLT_MAX, min_y = FLT_MAX, min_z = FLT_MAX;
-    float max_x = FLT_MIN, max_y = FLT_MIN, max_z = FLT_MIN;
+    float max_x = -FLT_MAX, max_y = -FLT_MAX, max_z = -FLT_MAX;
     for (int i = 0; i < object->points.size(); i++) {
         if (object->points[i].x > max_x) {
             max_x = object->points[i].x;
@@ -40,6 +40,7 @@ bool BoundingBoxFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr objec
 
     //Length, Width, Height 
     bounding_box_feature->resize(3, 0.0);
+
     bounding_box_feature->at(0) = max_x - min_x;
     bounding_box_feature->at(1) = max_y - min_y;
     bounding_box_feature->at(2) = max_z - min_z;

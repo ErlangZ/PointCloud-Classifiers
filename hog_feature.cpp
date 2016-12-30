@@ -12,7 +12,7 @@ namespace adu {
 namespace perception {
 
 HogFeature::HogFeature() : 
-    _image_size(160, 160),
+    _image_size(80, 80),
     //  winSize, BlockSize, BlockStride, CellSize, CellBins
     _hog(_image_size, cv::Size(40, 40), cv::Size(10, 10), cv::Size(10, 10), 6) {
     

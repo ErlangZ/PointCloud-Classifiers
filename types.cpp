@@ -64,14 +64,11 @@ void Box::show(pcl::visualization::PCLVisualizer& viewer) {
 
 std::string Box::type_str() const {
     switch (type) {
-        case smallMot: return "smallMot";
-        case midMot: return "midMot";
-        case bigMot: return "bigMot"; 
-        case nonMot: return "nonMot";
+        case smallMot: 
+        case midMot: 
+        case bigMot: return "vehicle"; 
         case pedestrian: return "pedestrian";
-        case cluster: return "cluster";
-        default: 
-             return "unknown";
+        default: return "unknown";
     }
 }
 const std::string Box::id_str() const {

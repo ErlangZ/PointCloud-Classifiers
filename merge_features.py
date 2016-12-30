@@ -13,6 +13,7 @@ Date: 2016/12/30 11:42:05
 """
 with open("./features--0") as f0, open("./features--1") as f1, open("./features--2") as f2, open("./features--3") as f3, open("./features--all", "w") as f:
     for lines in zip(f0.xreadlines(), f1.xreadlines(), f2.xreadlines(), f3.xreadlines()):
+        lines = [l.strip() for l in lines]
         name, label, data0 = lines[0].split("\t", 2)
         _, _, data1 = lines[1].split("\t", 2)
         _, _, data2 = lines[2].split("\t", 2)

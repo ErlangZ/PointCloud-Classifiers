@@ -67,7 +67,7 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
 }
 
 
-int main() {
+int main(int argc, char** argv) {
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
     //Read Cubes from File.
     std::string label_file_name = "/home/erlangz/3D_point_cloud/0711/groundtruth/result.txt";
@@ -76,17 +76,22 @@ int main() {
         std::cerr << "Open Label File:" << label_file_name << " failed." << std::endl;
         return -1;
     }
+    
+    int NUMBER = 10;
+    if (argc == 2) {
+        NUMBER = atoi(argv[1]);
+    }
+    std::cout << "Ready to Read " << NUMBER << " files." << std::endl;
 
     adu::perception::LabelsReader::Iter iter = labels_reader.begin();
     adu::perception::FeatureExtractor extractor(true, "features-");
     int count = 0;
     while(iter != labels_reader.end()) {
-        if (count++ > 10) {
+        if (count++ >= NUMBER) {
             break;
         } else {
-            std::cout << "File-Count:"<< count; 
+            std::cout << "File-Count: "<< count << " ";  
         }
-
         const std::string& pcd_file_name = iter->first;
         const Label::Ptr label = iter->second;
         pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = read_pcd(data_root + pcd_file_name);        

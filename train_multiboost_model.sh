@@ -48,5 +48,6 @@ PARAM="--baselearnertype SingleStumpLearner 3 --noloop"
 #train_model ../data/train/bounding_box_data $WEAK_LEARNER 10
 #test_model ../data/test/bounding_box_data $WEAK_LEARNER 10
 
-#train_test_model ../data/train/data ../data/test/data $WEAK_LEARNER "$PARAM" 200
+train_test_model ../data/train/data ../data/test/data $WEAK_LEARNER "$PARAM" 200
 test_model ../data/test/data $WEAK_LEARNER "$PARAM" 10
+

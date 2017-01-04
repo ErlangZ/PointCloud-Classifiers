@@ -42,12 +42,12 @@ mkdir -p model
 #PARAM="--baselearnertype SingleStumpLearner 3 --noloop"
 #Error=22%(Vehicle=4% Ped=8%)
 WEAK_LEARNER=TreeLearner
-PARAM="--baselearnertype SingleStumpLearner 3 --noloop"
+PARAM="--baselearnertype SingleStumpLearner 50 --noloop"
 
 # USE BoundBox Only
 #train_model ../data/train/bounding_box_data $WEAK_LEARNER 10
 #test_model ../data/test/bounding_box_data $WEAK_LEARNER 10
 
-train_test_model ../data/train/data ../data/test/data $WEAK_LEARNER "$PARAM" 200
-test_model ../data/test/data $WEAK_LEARNER "$PARAM" 10
+#train_test_model ../data/train/data.clean ../data/test/data $WEAK_LEARNER "$PARAM" 200
+test_model ../data/test/data.clean $WEAK_LEARNER "$PARAM" 10
 

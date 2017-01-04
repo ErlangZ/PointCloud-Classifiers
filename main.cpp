@@ -8,8 +8,11 @@
 #include <sstream>
 #include <string>
 
+#include <pcl/common/common_headers.h>
+#include <pcl/range_image/range_image.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/visualization/range_image_visualizer.h>
 #include <pcl/visualization/cloud_viewer.h>
 
 #include "features.h"
@@ -66,6 +69,34 @@ void draw_point_cloud_and_bounding_box(pcl::PointCloud<pcl::PointXYZ>::Ptr point
     }
 }
 
+void show_range_image(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, float resolution) {
+    //-----------------------------------------------
+    // -----Create RangeImage from the PointCloud-----
+    // -----------------------------------------------
+    Eigen::Affine3f scene_sensor_pose (Eigen::Affine3f::Identity());
+    float noise_level = 0.0;
+    float min_range = 0.0f;
+    int border_size = 1;
+    boost::shared_ptr<pcl::RangeImage> range_image(new pcl::RangeImage);
+    range_image->createFromPointCloud (*point_cloud, 
+                                       pcl::deg2rad(resolution),
+                                       pcl::deg2rad(360.0f), //maxAngleWidth
+                                       pcl::deg2rad(180.0f), //maxAngleHeight
+                                       scene_sensor_pose, 
+                                       pcl::RangeImage::CAMERA_FRAME,
+                                       noise_level, min_range, border_size);
+    // --------------------------
+    // -----Show range image-----
+    // --------------------------
+    pcl::visualization::RangeImageVisualizer range_image_widget ("Range image");
+    range_image_widget.showRangeImage(*range_image);
+    range_image_widget.spinOnce();
+
+    pcl::visualization::CloudViewer cloud_viewer("cloud_viewer"); 
+    cloud_viewer.showCloud(point_cloud);
+    while(!cloud_viewer.wasStopped()) {
+    }
+}
 
 int main(int argc, char** argv) {
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
@@ -78,8 +109,12 @@ int main(int argc, char** argv) {
     }
     
     int NUMBER = 10;
-    if (argc == 2) {
+    if (argc >= 2) {
         NUMBER = atoi(argv[1]);
+    }
+    float resolution = 0.23;
+    if (argc >= 3) {
+        resolution = atof(argv[2]);
     }
     std::cout << "Ready to Read " << NUMBER << " files." << std::endl;
 
@@ -96,7 +131,7 @@ int main(int argc, char** argv) {
         const Label::Ptr label = iter->second;
         pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = read_pcd(data_root + pcd_file_name);        
         if (!point_cloud) { return -1; }
-        extractor.extract(point_cloud, label); 
+        show_range_image(point_cloud, resolution);
 
         iter++;
     }

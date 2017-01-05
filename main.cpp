@@ -105,7 +105,7 @@ void show_range_image(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, flo
 }
 
 void show_cynlindrical_point_cloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, float resolution) {
-    adu::perception::Grid<pcl::PointXYZ> grid;
+    adu::perception::ThreeDimGrid<pcl::PointXYZ> grid;
     grid.set_point_cloud_xyz_coord(point_cloud);
 
     pcl::visualization::CloudViewer cloud_viewer("cylindrical_point_cloud_viewer"); 

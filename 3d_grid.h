@@ -92,9 +92,9 @@ public:
 };
 
 template<typename PointT>
-class Grid {
+class ThreeDimGrid {
 public:
-    Grid(){};
+    ThreeDimGrid() { };
 
     void set_point_cloud_xyz_coord(const typename pcl::PointCloud<PointT>::Ptr object) {
         _point_cloud = xyz_coord_to_cylindrical_coord(object);

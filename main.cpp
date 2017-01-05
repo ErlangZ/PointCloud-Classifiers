@@ -15,6 +15,7 @@
 #include <pcl/visualization/range_image_visualizer.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include "3d_grid.h"
 #include "features.h"
 #include "types.h"
 #include "label_reader.h"
@@ -98,6 +99,16 @@ void show_range_image(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, flo
     }
 }
 
+void show_cynlindrical_point_cloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, float resolution) {
+    adu::perception::Grid<pcl::PointXYZ> grid;
+    grid.set_point_cloud_xyz_coord(point_cloud);
+
+    pcl::visualization::CloudViewer cloud_viewer("cylindrical_point_cloud_viewer"); 
+    cloud_viewer.showCloud(grid.get_point_cloud_cylindrical_coord());
+    while(!cloud_viewer.wasStopped()) {
+    }
+}
+
 int main(int argc, char** argv) {
     std::string data_root = "/home/erlangz/3D_point_cloud/0711/original_cloud/";
     //Read Cubes from File.
@@ -131,7 +142,7 @@ int main(int argc, char** argv) {
         const Label::Ptr label = iter->second;
         pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud = read_pcd(data_root + pcd_file_name);        
         if (!point_cloud) { return -1; }
-        show_range_image(point_cloud, resolution);
+        show_cynlindrical_point_cloud(point_cloud, resolution);
 
         iter++;
     }

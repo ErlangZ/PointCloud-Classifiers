@@ -32,6 +32,11 @@ void show_box(const Label::Ptr& label, pcl::visualization::PCLVisualizer& viewer
     }
 };
 
+void show_axises(pcl::visualization::PCLVisualizer& viewer) {
+    viewer.addCoordinateSystem(1, 0, 4, 0);
+    viewer.addCube(-M_PI, M_PI, 4, 70, -5.0, 3.0, 1.0, 0.0, 0.0);
+}
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr read_pcd(const std::string& pcd_file_name) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud(new pcl::PointCloud<pcl::PointXYZ>); //Point Cloud MonochromeCloud(pcl::PointCloud<pcl::PointXYZ>)
     Eigen::Vector4f origin;          //sensor acquistion origin
@@ -104,7 +109,9 @@ void show_cynlindrical_point_cloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr poi
     grid.set_point_cloud_xyz_coord(point_cloud);
 
     pcl::visualization::CloudViewer cloud_viewer("cylindrical_point_cloud_viewer"); 
-    cloud_viewer.showCloud(grid.get_point_cloud_cylindrical_coord());
+    cloud_viewer.runOnVisualizationThreadOnce(show_axises);
+    cloud_viewer.showCloud(grid.cylindrical_coord_point_cloud());
+    std::cout << "PointCloud:" << grid.debug_string() << std::endl;
     while(!cloud_viewer.wasStopped()) {
     }
 }

@@ -12,38 +12,50 @@ BoundingBoxFeature::BoundingBoxFeature() {
 
 }
 
+bool BoundingBoxFeature::min_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
+                                 Eigen::Vector3f& min, Eigen::Vector3f& max) {
+    //Get AABB
+    for (int i = 0; i < 3; i++) {
+        min(i) = FLT_MAX;
+        max(i) = -FLT_MAX; 
+    }
+    for (int i = 0; i < object->points.size(); i++) {
+        if (object->points[i].x > max(0)) {
+            max(0) = object->points[i].x;
+        }
+        if (object->points[i].x < min(0)) {
+            min(0) = object->points[i].x;
+        }
+        if (object->points[i].y > max(1)) {
+            max(1) = object->points[i].y;
+        }
+        if (object->points[i].y < min(1)) {
+            min(1) = object->points[i].y;
+        }
+        if (object->points[i].z > max(2)) {
+            max(2) = object->points[i].z;
+        }
+        if (object->points[i].z < min(2)) {
+            min(2) = object->points[i].z;
+        }
+    }
+    return true;
+}
+
 bool BoundingBoxFeature::compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
                                  std::vector<float>* bounding_box_feature) {
-    //Get AABB
-    float min_x = FLT_MAX, min_y = FLT_MAX, min_z = FLT_MAX;
-    float max_x = -FLT_MAX, max_y = -FLT_MAX, max_z = -FLT_MAX;
-    for (int i = 0; i < object->points.size(); i++) {
-        if (object->points[i].x > max_x) {
-            max_x = object->points[i].x;
-        }
-        if (object->points[i].x < min_x) {
-            min_x = object->points[i].x;
-        }
-        if (object->points[i].y > max_y) {
-            max_y = object->points[i].y;
-        }
-        if (object->points[i].y < min_y) {
-            min_y = object->points[i].y;
-        }
-        if (object->points[i].z > max_z) {
-            max_z = object->points[i].z;
-        }
-        if (object->points[i].z < min_z) {
-            min_z = object->points[i].z;
-        }
+    Eigen::Vector3f min; 
+    Eigen::Vector3f max;
+
+    if(!min_max(object, min, max)) {
+        return false;
     }
 
     //Length, Width, Height 
     bounding_box_feature->resize(3, 0.0);
-
-    bounding_box_feature->at(0) = max_x - min_x;
-    bounding_box_feature->at(1) = max_y - min_y;
-    bounding_box_feature->at(2) = max_z - min_z;
+    for (int i = 0; i < 3; i++) {
+        bounding_box_feature->at(i) = max(i) - min(i);
+    }
     return true;
 }
 

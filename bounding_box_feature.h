@@ -18,6 +18,9 @@ public:
     BoundingBoxFeature();
     bool compute(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
                  std::vector<float>* bouding_box_features);
+    bool min_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr object,
+                 Eigen::Vector3f& min, Eigen::Vector3f& max);
+
 };
 
 } // namespace perception
